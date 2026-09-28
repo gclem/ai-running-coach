@@ -95,6 +95,29 @@ misleading.
 - **MD Files Language:** ALL Markdown files created in this project must use the language configured in `config/workspace.toml` → `[language].documents` (default: FRENCH) for headings, content, and labels. If `config/workspace.user.toml` exists, its values take precedence. This ensures consistency across the workspace.
 - **Load vocabulary (trademarks):** name training-load metrics generically — *charge* (TRIMP), *condition* (42-day average), *fatigue* (7-day average), *forme* (their difference), ACWR — in every language. Never write the trademarked names TSS, NP, IF, rTSS, hrTSS, NGP, CTL, ATL or TSB (Peaksware / TrainingPeaks marks), in files or in replies, even when a source (Intervals.icu, a forum, the athlete) uses them; the equivalence table lives in `docs/marques.md`. Garmin scores (Body Battery, Training Readiness) keep their Garmin names: they are quoted as Garmin data, not recomputed.
 
+### UNITS MANDATE — NEVER SPEAK IN RAW API UNITS
+
+- **Pace is ALWAYS expressed in `min:sec/km`** in every user-facing message, every
+  persisted Markdown file, and every Garmin workout step `description`.
+  `m/s` is the Garmin API's internal wire format for `pace.zone` targets
+  (`targetValueOne` / `targetValueTwo`) — it is an implementation detail and MUST
+  NEVER surface in coaching language.
+  - ✅ « 8 × 400 m à 4:25-4:35/km »
+  - ❌ « pace.zone 3,636-3,774 m/s »
+  - Conversion for building the DTO only: `m/s = 1000 / (pace_in_seconds_per_km)`.
+- **Same rule for every other raw unit.** Convert before speaking or writing:
+  | API field | Raw unit | Speak / write as |
+  |---|---|---|
+  | `pace.zone` targets | m/s | **min:sec/km** |
+  | `duration` / `endConditionValue` time | seconds | **min** (or `h min`) |
+  | `distance` / `endConditionValue` distance | meters | **km** (m below 1 km) |
+  | `avg_stride_length_cm` | cm | **m** (2 decimals) |
+  | `avg_ground_contact_time_ms` | ms | ms *(already the usable unit)* |
+  | `recovery_time_hours` decimals | 22.1 h | **22 h** or **~05 h 20 demain** |
+- **Exception:** raw values MAY appear inside the fenced
+  `## Données brutes Garmin (référence)` YAML block of an activity MD file, since
+  that block documents the API payload verbatim. Everywhere else, convert.
+
 ### DATA MANAGEMENT MANDATES
 - **Contextual Refresh:** Before answering, check the `activities/`, `medical/` (sleep/health), `planning/`, and `resources/` folders.
 - **Garmin Optimization:** Only invoke Garmin tools if the current date has changed or if logs for "today" are missing.
